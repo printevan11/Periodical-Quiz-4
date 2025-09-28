@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Periodic Table — Quizzes & Explorer (118 elements)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* CSS Variables for theming */
+    :root {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f1f5f9;
+      --text-primary: #0f172a;
+      --text-secondary: #64748b;
+      --text-tertiary: #94a3b8;
+      --border-color: #e2e8f0;
+      --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --modal-backdrop: rgba(15, 23, 42, 0.6);
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-tertiary: #334155;
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-tertiary: #94a3b8;
+      --border-color: #475569;
+      --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+      --modal-backdrop: rgba(0, 0, 0, 0.8);
+    }
+
+    /* Apply theme variables */
+    body {
+      background: linear-gradient(to bottom, var(--bg-primary), var(--bg-secondary));
+      color: var(--text-primary);
+      transition: background 0.3s ease;
+    }
+
+    /* Override the body class background in dark mode */
+    [data-theme="dark"] body.bg-gradient-to-b {
+      background: linear-gradient(to bottom, var(--bg-primary), var(--bg-secondary)) !important;
+    }
+
+    .bg-white { background-color: var(--bg-secondary) !important; }
+    .text-slate-900 { color: var(--text-primary) !important; }
+    .text-slate-600 { color: var(--text-secondary) !important; }
+    .text-slate-500 { color: var(--text-tertiary) !important; }
+    .border { border-color: var(--border-color) !important; }
+    .shadow { box-shadow: var(--shadow) !important; }
+    .shadow-xl { box-shadow: var(--shadow-lg) !important; }
+
+    /* Responsive periodic grid columns (keeps the feel of a table) */
+    #periodicGrid { grid-auto-rows: minmax(70px, auto); }
+    @media (max-width: 640px) {
+      #periodicGrid { grid-template-columns: repeat(6, minmax(0,1fr)); }
+    }
+    @media (min-width: 641px) and (max-width: 1024px) {
+      #periodicGrid { grid-template-columns: repeat(12, minmax(0,1fr)); }
+    }
+    @media (min-width: 1025px) {
+      #periodicGrid { grid-template-columns: repeat(18, minmax(0,1fr)); }
+    }
+
+    /* Modal backdrop */
+    .modal-backdrop { background: var(--modal-backdrop); }
+    /* nice focus ring */
+    .focus-ring:focus { outline: none; box-shadow: 0 0 0 3px rgba(99,102,241,0.2); }
+
+    /* Theme toggle button */
+    .theme-toggle {
+      position: relative;
+      width: 60px;
+      height: 30px;
+      background: var(--bg-tertiary);
+      border-radius: 15px;
+      border: 2px solid var(--border-color);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .theme-toggle::before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 22px;
+      height: 22px;
+      background: var(--text-primary);
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+
+    [data-theme="dark"] .theme-toggle::before {
+      transform: translateX(30px);
+    }
+
+    .theme-toggle:hover {
+      border-color: #6366f1;
+    }
+
+    /* Dark mode specific adjustments */
+    [data-theme="dark"] .bg-gradient-to-br {
+      background: linear-gradient(to bottom right, var(--bg-secondary), var(--bg-tertiary)) !important;
+    }
+
+    [data-theme="dark"] .hover\:bg-slate-100:hover {
+      background-color: var(--bg-tertiary) !important;
+    }
+
+    [data-theme="dark"] .hover\:bg-slate-50:hover {
+      background-color: var(--bg-tertiary) !important;
+    }
+
+    [data-theme="dark"] .bg-slate-100 {
+      background-color: var(--bg-tertiary) !important;
+    }
+
+    [data-theme="dark"] .bg-slate-50 {
+      background-color: var(--bg-tertiary) !important;
+    }
+
+    /* Ensure header background changes in dark mode */
+    [data-theme="dark"] header {
+      background-color: var(--bg-secondary) !important;
+      opacity: 0.6 !important;
+    }
+
+    /* Ensure main content area background changes */
+    [data-theme="dark"] .max-w-7xl {
+      background: transparent;
+    }
+
+    /* Fix any remaining background issues */
+    [data-theme="dark"] .bg-white\/60 {
+      background-color: var(--bg-secondary) !important;
+      opacity: 0.6 !important;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-b from-slate-50 to-white min-h-screen text-slate-900">
+
+  <!-- Header with burger -->
+  <header class="bg-white/60 backdrop-blur sticky top-0 z-30 border-b" style="background-color: var(--bg-secondary); opacity: 0.6;">
+    <div class="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <button id="burgerBtn" class="p-1.5 rounded-md hover:bg-slate-100 focus-ring" aria-label="Open menu">☰</button>
+        <div>
+          <h1 class="text-base font-bold">Periodic Table — Quizzes & Explorer</h1>
+          <div class="text-xs text-slate-500">Interactive learning + 118 elements • quizzes • categories</div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+        </button>
+        <button id="exploreBtn" class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Explore Periodic Table</button>
+        <button id="dashboardBtn" class="px-3 py-1.5 text-sm bg-white border rounded-md hover:shadow-sm">Dashboard</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="max-w-7xl mx-auto px-4 py-6 flex gap-6">
+    <!-- Sidebar (burger menu slide-in) -->
+    <aside id="sidebar" class="fixed left-0 top-0 h-full w-0 overflow-hidden z-40 transition-all duration-300">
+      <div class="bg-white h-full shadow-xl p-4 w-72">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold">Categories</h2>
+          <button id="closeSidebar" class="text-slate-600 hover:bg-slate-100 p-1 rounded">✕</button>
+        </div>
+        <div class="space-y-2">
+          <!-- category buttons will be injected -->
+          <div id="categoryList" class="flex flex-col gap-2"></div>
+        </div>
+        <div class="mt-6">
+          <h3 class="text-sm font-medium text-slate-600 mb-2">Quick jump</h3>
+          <div class="flex flex-wrap gap-2">
+            <button class="quick-jump px-3 py-1 rounded bg-slate-100 text-sm" data-jump="1">H</button>
+            <button class="quick-jump px-3 py-1 rounded bg-slate-100 text-sm" data-jump="2">He</button>
+            <button class="quick-jump px-3 py-1 rounded bg-slate-100 text-sm" data-jump="3">Li</button>
+            <button class="quick-jump px-3 py-1 rounded bg-slate-100 text-sm" data-jump="79">Au</button>
+            <button class="quick-jump px-3 py-1 rounded bg-slate-100 text-sm" data-jump="118">Og</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="flex-1">
+      <!-- Dashboard -->
+      <section id="dashboard" class="mb-6">
+        <div class="bg-white rounded-2xl shadow p-6">
+          <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+              <h2 class="text-2xl font-bold">Learn & Master the Elements</h2>
+              <p class="text-slate-600 mt-1">Interactive quizzes, an explorer for every element, and quick category lists — all in one place.</p>
+            </div>
+            <div class="flex gap-3">
+              <button id="startElement" onclick="startQuizMode('element')" class="px-4 py-2 bg-rose-500 text-white rounded-md hover:bg-rose-600">Element Quiz</button>
+              <button id="startAtomic" onclick="startQuizMode('atomic')" class="px-4 py-2 bg-emerald-500 text-white rounded-md hover:bg-emerald-600">Atomic Mass Quiz</button>
+              <button id="startCategory" onclick="startQuizMode('category')" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Category Quiz</button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+            <!-- Element Quiz Card -->
+            <div class="p-4 bg-gradient-to-br from-white to-slate-50 rounded-xl shadow-sm hover:shadow-md transition">
+              <h3 class="font-semibold text-lg">Element Quiz</h3>
+              <p class="text-sm text-slate-600 mt-1">Symbol → choose correct spelling. Tough distractors to train memory.</p>
+              <div class="flex gap-2 mt-4">
+                <button onclick="startQuizMode('element')" class="px-3 py-2 rounded bg-rose-500 text-white">Start</button>
+                <button onclick="openExplorer()" class="px-3 py-2 rounded border">Explore</button>
+              </div>
+            </div>
+
+            <!-- Atomic Mass Card -->
+            <div class="p-4 bg-gradient-to-br from-white to-slate-50 rounded-xl shadow-sm hover:shadow-md transition">
+              <h3 class="font-semibold text-lg">Atomic Mass Quiz</h3>
+              <p class="text-sm text-slate-600 mt-1">Guess atomic mass (multiple choice). Distractors are close values.</p>
+              <div class="flex gap-2 mt-4">
+                <button onclick="startQuizMode('atomic')" class="px-3 py-2 rounded bg-emerald-500 text-white">Start</button>
+                <button onclick="openExplorer()" class="px-3 py-2 rounded border">Explore</button>
+              </div>
+            </div>
+
+            <!-- Category Quiz Card -->
+            <div class="p-4 bg-gradient-to-br from-white to-slate-50 rounded-xl shadow-sm hover:shadow-md transition">
+              <h3 class="font-semibold text-lg">Category Quiz</h3>
+              <p class="text-sm text-slate-600 mt-1">30 random questions: which category does the element belong to?</p>
+              <div class="flex gap-2 mt-4">
+                <button onclick="startQuizMode('category')" class="px-3 py-2 rounded bg-indigo-600 text-white">Start</button>
+                <button onclick="openExplorer()" class="px-3 py-2 rounded border">Explore</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quiz Container -->
+      <section id="quizApp" class="hidden">
+        <div class="bg-white rounded-2xl shadow p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div class="text-lg font-semibold" id="quizTitle">Quiz</div>
+            <div class="flex gap-2 items-center">
+              <div class="text-sm text-slate-600">Score: <span id="globalScore">0</span></div>
+              <button onclick="backToDashboard()" class="px-3 py-1 rounded bg-slate-100">Back</button>
+            </div>
+          </div>
+
+          <!-- Element Quiz -->
+          <div id="elementQuiz" class="hidden">
+            <div class="text-sm text-slate-600 mb-2">Question:</div>
+            <div class="flex flex-col items-center mb-4">
+              <div id="elSymbol" class="text-6xl font-extrabold mb-1">?</div>
+              <div id="elMeta" class="text-sm text-slate-500">Atomic No. ? • Mass ?</div>
+            </div>
+            <div id="elChoices" class="grid gap-3 grid-cols-1 sm:grid-cols-2 mb-4"></div>
+            <div class="flex gap-3 justify-center mb-3">
+              <button id="elReveal" class="px-4 py-2 rounded border">Reveal</button>
+              <button id="elNext" class="px-4 py-2 rounded bg-rose-500 text-white">Next</button>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="text-sm">Score: <span id="elScore">0</span> / <span id="elTotal">0</span></div>
+              <div id="elResult" class="text-sm font-medium"></div>
+            </div>
+          </div>
+
+          <!-- Atomic Mass Quiz -->
+          <div id="atomicQuiz" class="hidden">
+            <div class="text-sm text-slate-600 mb-2">Question:</div>
+            <div id="atomicQuestion" class="text-center text-xl font-bold mb-4">?</div>
+            <div id="atomicChoices" class="grid gap-3 grid-cols-1 sm:grid-cols-2 mb-4"></div>
+            <div class="flex gap-3 justify-center mb-3">
+              <button id="atomicNext" class="px-4 py-2 rounded border">Next</button>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="text-sm">Score: <span id="atomicScore">0</span> / <span id="atomicTotal">0</span></div>
+              <div id="atomicResult" class="text-sm font-medium"></div>
+            </div>
+          </div>
+
+          <!-- Category Quiz -->
+          <div id="categoryQuiz" class="hidden">
+            <div class="text-sm text-slate-600 mb-2">Question:</div>
+            <div id="categoryQuestion" class="text-center text-xl font-bold mb-4">?</div>
+            <div id="categoryChoices" class="grid gap-3 grid-cols-1 sm:grid-cols-2 mb-4"></div>
+            <div class="flex gap-3 justify-center mb-3">
+              <button id="categoryNext" class="px-4 py-2 rounded border">Next</button>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="text-sm">Score: <span id="categoryScore">0</span> / <span id="categoryTotal">30</span></div>
+              <div id="categoryResult" class="text-sm font-medium"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Explorer / Table view -->
+      <section id="explorer" class="hidden mt-6">
+        <div class="bg-white rounded-2xl shadow p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold">Periodic Table Explorer</h3>
+            <div class="flex items-center gap-2">
+              <label class="text-sm text-slate-500">Filter:</label>
+              <select id="exploreFilter" class="px-2 py-1 border rounded">
+                <option value="all">All</option>
+              </select>
+              <button id="showTableBtn" class="px-3 py-1 rounded bg-indigo-600 text-white">Show Table</button>
+            </div>
+          </div>
+
+          <div id="periodicGrid" class="grid gap-1"></div>
+          <div class="mt-4 p-3 border rounded bg-slate-50">
+            <div id="elementDetails" class="text-sm"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal: element details without image -->
+  <div id="modal" class="fixed inset-0 hidden items-center justify-center modal-backdrop z-50">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-4 overflow-hidden">
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 id="modalTitle" class="text-2xl font-bold"></h3>
+          <button id="modalClose" class="px-3 py-1 rounded bg-slate-100">Close</button>
+        </div>
+        <div id="modalMeta" class="text-lg text-slate-600 mb-4"></div>
+        <p id="modalDesc" class="text-slate-700 leading-relaxed"></p>
+      </div>
+    </div>
+  </div>
+
+<footer class="text-center text-sm text-slate-500 p-4">Made with ♥ — Evan Roi Tabar</footer>
+
+<script>
+/* -----------------------------
+   FULL 118 ELEMENTS
+   fields: number, symbol, name, mass, category, description
+   (images are generated via placeholder URL to avoid 118 external links)
+------------------------------*/
+const elements = [
+{ number:1,symbol:"H",name:"Hydrogen",mass:1.008,category:"nonmetal",description:"Lightest element; main component of stars and many fuels. Used in industry and research."},
+{ number:2,symbol:"He",name:"Helium",mass:4.002602,category:"noble gas",description:"Noble gas; very low boiling point; used in cryogenics and balloons."},
+{ number:3,symbol:"Li",name:"Lithium",mass:6.94,category:"alkali metal",description:"Soft, silvery alkali metal used extensively in rechargeable batteries."},
+{ number:4,symbol:"Be",name:"Beryllium",mass:9.0121831,category:"alkaline earth metal",description:"Light, stiff metal used in aerospace and high-tech applications; toxic in dust form."},
+{ number:5,symbol:"B",name:"Boron",mass:10.81,category:"metalloid",description:"Metalloid used in glass, detergents, and as a semiconductor dopant."},
+{ number:6,symbol:"C",name:"Carbon",mass:12.011,category:"nonmetal",description:"Essential element for life; forms countless organic compounds; graphite and diamond forms."},
+{ number:7,symbol:"N",name:"Nitrogen",mass:14.007,category:"nonmetal",description:"Makes up most of Earth's atmosphere; used in fertilizers and industrial processes."},
+{ number:8,symbol:"O",name:"Oxygen",mass:15.999,category:"nonmetal",description:"Supports combustion and respiration; abundant in Earth's crust and atmosphere."},
+{ number:9,symbol:"F",name:"Fluorine",mass:18.998403163,category:"halogen",description:"Highly reactive halogen used in fluorides and industrial chemicals."},
+{ number:10,symbol:"Ne",name:"Neon",mass:20.1797,category:"noble gas",description:"Inert noble gas used in lighting and signs."},
+{ number:11,symbol:"Na",name:"Sodium",mass:22.98976928,category:"alkali metal",description:"Reactive alkali metal; essential for life in electrolytes; used industrially."},
+{ number:12,symbol:"Mg",name:"Magnesium",mass:24.305,category:"alkaline earth metal",description:"Light metal used in alloys, structural components, and biology."},
+{ number:13,symbol:"Al",name:"Aluminium",mass:26.9815385,category:"post-transition metal",description:"Light, corrosion-resistant metal used widely in packaging, construction, and transport."},
+{ number:14,symbol:"Si",name:"Silicon",mass:28.085,category:"metalloid",description:"Semiconductor backbone — essential for electronics and computer chips."},
+{ number:15,symbol:"P",name:"Phosphorus",mass:30.973761998,category:"nonmetal",description:"Vital for life (DNA, ATP); used in fertilizers and chemicals."},
+{ number:16,symbol:"S",name:"Sulfur",mass:32.06,category:"nonmetal",description:"Used in fertilizers, chemicals, and vulcanization of rubber."},
+{ number:17,symbol:"Cl",name:"Chlorine",mass:35.45,category:"halogen",description:"Used for disinfection (water treatment) and chemical production."},
+{ number:18,symbol:"Ar",name:"Argon",mass:39.948,category:"noble gas",description:"Inert gas used in welding and as shielding gas."},
+{ number:19,symbol:"K",name:"Potassium",mass:39.0983,category:"alkali metal",description:"Essential nutrient for plants and animals; reactive alkali metal."},
+{ number:20,symbol:"Ca",name:"Calcium",mass:40.078,category:"alkaline earth metal",description:"Essential mineral for bones; used in cement and metallurgy."},
+{ number:21,symbol:"Sc",name:"Scandium",mass:44.955908,category:"transition metal",description:"Rare transition metal used in aerospace alloys and lighting."},
+{ number:22,symbol:"Ti",name:"Titanium",mass:47.867,category:"transition metal",description:"Strong, corrosion-resistant metal used in aerospace, medical implants."},
+{ number:23,symbol:"V",name:"Vanadium",mass:50.9415,category:"transition metal",description:"Used in steel alloys and catalysts."},
+{ number:24,symbol:"Cr",name:"Chromium",mass:51.9961,category:"transition metal",description:"Known for corrosion-resistant plating and stainless steel production."},
+{ number:25,symbol:"Mn",name:"Manganese",mass:54.938044,category:"transition metal",description:"Important in steel production and as a trace nutrient."},
+{ number:26,symbol:"Fe",name:"Iron",mass:55.845,category:"transition metal",description:"Abundant, core metal for steel; crucial for biology (hemoglobin)."},
+{ number:27,symbol:"Co",name:"Cobalt",mass:58.933194,category:"transition metal",description:"Used in alloys, batteries, and catalysts."},
+{ number:28,symbol:"Ni",name:"Nickel",mass:58.6934,category:"transition metal",description:"Used in alloys, stainless steel, and batteries."},
+{ number:29,symbol:"Cu",name:"Copper",mass:63.546,category:"transition metal",description:"Excellent electrical conductor used in wiring and electronics."},
+{ number:30,symbol:"Zn",name:"Zinc",mass:65.38,category:"transition metal",description:"Used for galvanizing steel and in batteries and biology."},
+{ number:31,symbol:"Ga",name:"Gallium",mass:69.723,category:"post-transition metal",description:"Melts near room temperature; used in semiconductors and LEDs."},
+{ number:32,symbol:"Ge",name:"Germanium",mass:72.63,category:"metalloid",description:"Semiconductor used in electronics and infrared optics."},
+{ number:33,symbol:"As",name:"Arsenic",mass:74.921595,category:"metalloid",description:"Toxic metalloid with historical and industrial uses; semiconductor research."},
+{ number:34,symbol:"Se",name:"Selenium",mass:78.971,category:"nonmetal",description:"Used in electronics and as a trace nutrient."},
+{ number:35,symbol:"Br",name:"Bromine",mass:79.904,category:"halogen",description:"Liquid halogen used in flame retardants and chemicals."},
+{ number:36,symbol:"Kr",name:"Krypton",mass:83.798,category:"noble gas",description:"Noble gas used in lighting and lasers."},
+{ number:37,symbol:"Rb",name:"Rubidium",mass:85.4678,category:"alkali metal",description:"Soft alkali metal used in research and atomic clocks."},
+{ number:38,symbol:"Sr",name:"Strontium",mass:87.62,category:"alkaline earth metal",description:"Used in fireworks for red color and in some ceramics."},
+{ number:39,symbol:"Y",name:"Yttrium",mass:88.90584,category:"transition metal",description:"Used in LEDs, superconductors, and ceramics."},
+{ number:40,symbol:"Zr",name:"Zirconium",mass:91.224,category:"transition metal",description:"Corrosion-resistant; used in nuclear reactors and ceramics."},
+{ number:41,symbol:"Nb",name:"Niobium",mass:92.90637,category:"transition metal",description:"Used in superalloys and superconducting materials."},
+{ number:42,symbol:"Mo",name:"Molybdenum",mass:95.95,category:"transition metal",description:"Used in steel alloys and catalysts."},
+{ number:43,symbol:"Tc",name:"Technetium",mass:98,category:"transition metal",description:"First artificially produced element; used in medical imaging."},
+{ number:44,symbol:"Ru",name:"Ruthenium",mass:101.07,category:"transition metal",description:"Used in electronics, catalysts, and alloys."},
+{ number:45,symbol:"Rh",name:"Rhodium",mass:102.9055,category:"transition metal",description:"Rare, reflective metal used in catalytic converters and jewelry."},
+{ number:46,symbol:"Pd",name:"Palladium",mass:106.42,category:"transition metal",description:"Catalyst in automotive converters and in electronics."},
+{ number:47,symbol:"Ag",name:"Silver",mass:107.8682,category:"transition metal",description:"Excellent conductor with uses in jewelry, photography, and electronics."},
+{ number:48,symbol:"Cd",name:"Cadmium",mass:112.414,category:"transition metal",description:"Used in batteries and coatings; toxic in certain forms."},
+{ number:49,symbol:"In",name:"Indium",mass:114.818,category:"post-transition metal",description:"Used in touchscreens and low-melting alloys."},
+{ number:50,symbol:"Sn",name:"Tin",mass:118.71,category:"post-transition metal",description:"Used in solder and plating; resistant to corrosion."},
+{ number:51,symbol:"Sb",name:"Antimony",mass:121.76,category:"metalloid",description:"Used in flame retardants and alloys."},
+{ number:52,symbol:"Te",name:"Tellurium",mass:127.6,category:"metalloid",description:"Used in alloys and semiconductor compounds."},
+{ number:53,symbol:"I",name:"Iodine",mass:126.90447,category:"halogen",description:"Essential nutrient; used as disinfectant and in medicine."},
+{ number:54,symbol:"Xe",name:"Xenon",mass:131.293,category:"noble gas",description:"Noble gas used in lighting, anesthesia, and ion propulsion."},
+{ number:55,symbol:"Cs",name:"Caesium",mass:132.90545196,category:"alkali metal",description:"Highly reactive alkali metal; used in atomic clocks."},
+{ number:56,symbol:"Ba",name:"Barium",mass:137.327,category:"alkaline earth metal",description:"Used in medical imaging and in fireworks."},
+{ number:57,symbol:"La",name:"Lanthanum",mass:138.90547,category:"lanthanide",description:"Lanthanide used in camera lenses and catalysts."},
+{ number:58,symbol:"Ce",name:"Cerium",mass:140.116,category:"lanthanide",description:"Used in catalytic converters and polishing powders."},
+{ number:59,symbol:"Pr",name:"Praseodymium",mass:140.90766,category:"lanthanide",description:"Used in magnets and specialty glasses."},
+{ number:60,symbol:"Nd",name:"Neodymium",mass:144.242,category:"lanthanide",description:"Key rare-earth for strong permanent magnets."},
+{ number:61,symbol:"Pm",name:"Promethium",mass:145,category:"lanthanide",description:"Radioactive lanthanide produced synthetically; research uses."},
+{ number:62,symbol:"Sm",name:"Samarium",mass:150.36,category:"lanthanide",description:"Used in magnets and nuclear control rods."},
+{ number:63,symbol:"Eu",name:"Europium",mass:151.964,category:"lanthanide",description:"Used in phosphors for screens and lighting."},
+{ number:64,symbol:"Gd",name:"Gadolinium",mass:157.25,category:"lanthanide",description:"Used in MRI contrast agents and alloys."},
+{ number:65,symbol:"Tb",name:"Terbium",mass:158.92535,category:"lanthanide",description:"Used in green phosphors and alloys."},
+{ number:66,symbol:"Dy",name:"Dysprosium",mass:162.5,category:"lanthanide",description:"Used in magnets and nuclear reactors."},
+{ number:67,symbol:"Ho",name:"Holmium",mass:164.93033,category:"lanthanide",description:"Used in magnets and some lasers."},
+{ number:68,symbol:"Er",name:"Erbium",mass:167.259,category:"lanthanide",description:"Used in fiber-optic amplifiers and lasers."},
+{ number:69,symbol:"Tm",name:"Thulium",mass:168.93422,category:"lanthanide",description:"Rare, used in some portable X-ray devices."},
+{ number:70,symbol:"Yb",name:"Ytterbium",mass:173.045,category:"lanthanide",description:"Used in alloys and some lasers."},
+{ number:71,symbol:"Lu",name:"Lutetium",mass:174.9668,category:"lanthanide",description:"Dense lanthanide used in catalysts and PET scanners."},
+{ number:72,symbol:"Hf",name:"Hafnium",mass:178.49,category:"transition metal",description:"Used in nuclear control rods and high-temperature alloys."},
+{ number:73,symbol:"Ta",name:"Tantalum",mass:180.94788,category:"transition metal",description:"Corrosion-resistant metal used in electronics (capacitors)."},
+{ number:74,symbol:"W",name:"Tungsten",mass:183.84,category:"transition metal",description:"Very high melting point metal used in filaments and heavy alloys."},
+{ number:75,symbol:"Re",name:"Rhenium",mass:186.207,category:"transition metal",description:"Rare metal used in high-temperature superalloys."},
+{ number:76,symbol:"Os",name:"Osmium",mass:190.23,category:"transition metal",description:"Dense, hard metal used in specialized alloys and tips."},
+{ number:77,symbol:"Ir",name:"Iridium",mass:192.217,category:"transition metal",description:"Very corrosion-resistant; used in high-temperature applications."},
+{ number:78,symbol:"Pt",name:"Platinum",mass:195.084,category:"transition metal",description:"Noble metal used as catalyst and in jewelry."},
+{ number:79,symbol:"Au",name:"Gold",mass:196.966569,category:"transition metal",description:"Highly malleable noble metal used in jewelry, electronics, finance."},
+{ number:80,symbol:"Hg",name:"Mercury",mass:200.592,category:"transition metal",description:"Liquid metal at room temp; used historically in thermometers (toxic)."},
+{ number:81,symbol:"Tl",name:"Thallium",mass:204.38,category:"post-transition metal",description:"Toxic metal used in electronics and research."},
+{ number:82,symbol:"Pb",name:"Lead",mass:207.2,category:"post-transition metal",description:"Dense metal used historically in pipes and paints (toxic)."},
+{ number:83,symbol:"Bi",name:"Bismuth",mass:208.9804,category:"post-transition metal",description:"Low-toxicity metal used in cosmetics and pharmaceuticals."},
+{ number:84,symbol:"Po",name:"Polonium",mass:209,category:"post-transition metal",description:"Highly radioactive element discovered by Marie Curie; used in research."},
+{ number:85,symbol:"At",name:"Astatine",mass:210,category:"halogen",description:"Very rare, radioactive halogen with few practical uses."},
+{ number:86,symbol:"Rn",name:"Radon",mass:222,category:"noble gas",description:"Radioactive noble gas produced by uranium decay; health hazard indoors."},
+{ number:87,symbol:"Fr",name:"Francium",mass:223,category:"alkali metal",description:"Extremely rare, highly radioactive alkali metal; research interest only."},
+{ number:88,symbol:"Ra",name:"Radium",mass:226,category:"alkaline earth metal",description:"Radioactive metal formerly used in luminescent paints (now largely avoided)."},
+{ number:89,symbol:"Ac",name:"Actinium",mass:227,category:"actinide",description:"Radioactive actinide used in research and neutron sources."},
+{ number:90,symbol:"Th",name:"Thorium",mass:232.0377,category:"actinide",description:"Radioactive metal considered for nuclear fuel and research."},
+{ number:91,symbol:"Pa",name:"Protactinium",mass:231.03588,category:"actinide",description:"Rare actinide used in scientific research."},
+{ number:92,symbol:"U",name:"Uranium",mass:238.02891,category:"actinide",description:"Fissile material used in nuclear power and weapons."},
+{ number:93,symbol:"Np",name:"Neptunium",mass:237,category:"actinide",description:"Synthetic radioactive element used in research."},
+{ number:94,symbol:"Pu",name:"Plutonium",mass:244,category:"actinide",description:"Radioactive actinide used in nuclear fuel and weapons (careful!)."},
+{ number:95,symbol:"Am",name:"Americium",mass:243,category:"actinide",description:"Used in smoke detectors (small amounts) and research."},
+{ number:96,symbol:"Cm",name:"Curium",mass:247,category:"actinide",description:"Radioactive element used in research and neutron sources."},
+{ number:97,symbol:"Bk",name:"Berkelium",mass:247,category:"actinide",description:"Synthetic actinide used in scientific studies."},
+{ number:98,symbol:"Cf",name:"Californium",mass:251,category:"actinide",description:"Used as a neutron source in industry and research."},
+{ number:99,symbol:"Es",name:"Einsteinium",mass:252,category:"actinide",description:"Synthetic element named after Einstein; research only."},
+{ number:100,symbol:"Fm",name:"Fermium",mass:257,category:"actinide",description:"Highly radioactive and synthetic; used in scientific research."},
+{ number:101,symbol:"Md",name:"Mendelevium",mass:258,category:"actinide",description:"Named after Mendeleev; synthetic element for research."},
+{ number:102,symbol:"No",name:"Nobelium",mass:259,category:"actinide",description:"Synthetic actinide used for research."},
+{ number:103,symbol:"Lr",name:"Lawrencium",mass:262,category:"actinide",description:"Synthetic heavy element used in research."},
+{ number:104,symbol:"Rf",name:"Rutherfordium",mass:267,category:"transition metal",description:"Superheavy synthetic element used in studies."},
+{ number:105,symbol:"Db",name:"Dubnium",mass:268,category:"transition metal",description:"Synthetic transactinide named for Dubna research center."},
+{ number:106,symbol:"Sg",name:"Seaborgium",mass:269,category:"transition metal",description:"Named after Glenn Seaborg; synthetic and research-only."},
+{ number:107,symbol:"Bh",name:"Bohrium",mass:270,category:"transition metal",description:"Synthetic element named for Niels Bohr; research uses."},
+{ number:108,symbol:"Hs",name:"Hassium",mass:269,category:"transition metal",description:"Named after the German state of Hesse; synthetic."},
+{ number:109,symbol:"Mt",name:"Meitnerium",mass:278,category:"transition metal",description:"Named after Lise Meitner; superheavy synthetic element."},
+{ number:110,symbol:"Ds",name:"Darmstadtium",mass:281,category:"transition metal",description:"Named after Darmstadt; synthetic element."},
+{ number:111,symbol:"Rg",name:"Roentgenium",mass:282,category:"transition metal",description:"Named after Roentgen; synthetic element used in research."},
+{ number:112,symbol:"Cn",name:"Copernicium",mass:285,category:"transition metal",description:"Named after Copernicus; synthetic and short-lived."},
+{ number:113,symbol:"Nh",name:"Nihonium",mass:286,category:"post-transition metal",description:"Named for Japan (Nihon); synthetic element."},
+{ number:114,symbol:"Fl",name:"Flerovium",mass:289,category:"post-transition metal",description:"Synthetic element named after Flerov Institute."},
+{ number:115,symbol:"Mc",name:"Moscovium",mass:288,category:"post-transition metal",description:"Named after Moscow region; synthetic."},
+{ number:116,symbol:"Lv",name:"Livermorium",mass:293,category:"post-transition metal",description:"Named after Lawrence Livermore Lab; synthetic."},
+{ number:117,symbol:"Ts",name:"Tennessine",mass:294,category:"halogen",description:"Named after Tennessee; superheavy synthetic halogen."},
+{ number:118,symbol:"Og",name:"Oganesson",mass:294,category:"noble gas",description:"Named after Yuri Oganessian; very heavy, synthetic noble gas."}
+];
+
+/* -----------------------------
+   UI element references
+------------------------------*/
+const burgerBtn = document.getElementById('burgerBtn');
+const sidebar = document.getElementById('sidebar');
+const closeSidebar = document.getElementById('closeSidebar');
+const categoryList = document.getElementById('categoryList');
+const dashboardEl = document.getElementById('dashboard');
+const quizApp = document.getElementById('quizApp');
+const explorer = document.getElementById('explorer');
+const explorerFilter = document.getElementById('exploreFilter');
+const periodicGrid = document.getElementById('periodicGrid');
+const elementDetails = document.getElementById('elementDetails');
+const modal = document.getElementById('modal');
+const modalTitle = document.getElementById('modalTitle');
+const modalMeta = document.getElementById('modalMeta');
+const modalDesc = document.getElementById('modalDesc');
+const modalClose = document.getElementById('modalClose');
+
+const elementQuizDiv = document.getElementById('elementQuiz');
+const atomicQuizDiv = document.getElementById('atomicQuiz');
+const categoryQuizDiv = document.getElementById('categoryQuiz');
+
+const elSymbol = document.getElementById('elSymbol');
+const elMeta = document.getElementById('elMeta');
+const elChoices = document.getElementById('elChoices');
+const elRevealBtn = document.getElementById('elReveal');
+const elNextBtn = document.getElementById('elNext');
+const elScoreEl = document.getElementById('elScore');
+const elTotalEl = document.getElementById('elTotal');
+const elResult = document.getElementById('elResult');
+
+const atomicQuestionEl = document.getElementById('atomicQuestion');
+const atomicChoicesEl = document.getElementById('atomicChoices');
+const atomicNextBtn = document.getElementById('atomicNext');
+const atomicScoreEl = document.getElementById('atomicScore');
+const atomicTotalEl = document.getElementById('atomicTotal');
+const atomicResult = document.getElementById('atomicResult');
+
+const categoryQuestionEl = document.getElementById('categoryQuestion');
+const categoryChoicesEl = document.getElementById('categoryChoices');
+const categoryNextBtn = document.getElementById('categoryNext');
+const categoryScoreEl = document.getElementById('categoryScore');
+const categoryTotalEl = document.getElementById('categoryTotal');
+const categoryResult = document.getElementById('categoryResult');
+
+const exploreBtn = document.getElementById('exploreBtn');
+const dashboardBtn = document.getElementById('dashboardBtn');
+const showTableBtn = document.getElementById('showTableBtn');
+
+/* -----------------------------
+   Helpers
+------------------------------*/
+function shuffle(arr){ return arr.slice().sort(()=>Math.random()-0.5); }
+function formatMass(m){ return (typeof m === 'number') ? parseFloat(m.toFixed(5)) : m; }
+function titleCase(s){ return s.split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' '); }
+// Image function removed - no longer needed
+
+/* -----------------------------
+   Build categories list
+------------------------------*/
+const categories = Array.from(new Set(elements.map(e=>e.category))).sort();
+function renderCategoryList(){
+  categoryList.innerHTML = '';
+  categories.forEach(cat=>{
+    const btn = document.createElement('button');
+    btn.className = 'text-left w-full px-3 py-2 rounded hover:bg-slate-100';
+    btn.textContent = titleCase(cat);
+    btn.onclick = ()=> showCategoryElements(cat);
+    categoryList.appendChild(btn);
+    // also add as option to exploreFilter
+    const opt = document.createElement('option');
+    opt.value = cat; opt.textContent = titleCase(cat);
+    explorerFilter.appendChild(opt);
+  });
+}
+renderCategoryList();
+
+/* -----------------------------
+   Sidebar open/close
+------------------------------*/
+burgerBtn.addEventListener('click', ()=> {
+  sidebar.style.width = '18rem';
+});
+closeSidebar.addEventListener('click', ()=> {
+  sidebar.style.width = '0';
+});
+document.querySelectorAll('.quick-jump').forEach(btn=>{
+  btn.addEventListener('click', ()=> {
+    const idx = parseInt(btn.dataset.jump,10);
+    const found = elements.find(e=>e.number===idx);
+    if(found) { openModalFor(found); sidebar.style.width='0'; }
+  });
+});
+
+/* -----------------------------
+   Category -> show list of elements (in sidebar area)
+------------------------------*/
+function showCategoryElements(cat){
+  // render list inside sidebar area (replace categoryList)
+  const list = elements.filter(e=>e.category===cat);
+  const container = document.createElement('div');
+  container.className = 'mt-3 space-y-2';
+  container.innerHTML = `<div class="mb-2 font-medium">${titleCase(cat)}</div>`;
+  list.forEach(el=>{
+    const b = document.createElement('button');
+    b.className = 'w-full text-left px-3 py-2 rounded hover:bg-slate-50';
+    b.innerHTML = `<div class="flex items-center justify-between"><div>${el.symbol} — ${el.name}</div><div class="text-xs text-slate-500">${el.number}</div></div>`;
+    b.onclick = ()=> { openModalFor(el); sidebar.style.width='0'; };
+    container.appendChild(b);
+  });
+  // replace categoryList content temporarily
+  categoryList.innerHTML = '';
+  const backBtn = document.createElement('button');
+  backBtn.className = 'px-3 py-2 rounded bg-slate-100 w-full mb-2';
+  backBtn.textContent = '← Back to categories';
+  backBtn.onclick = ()=> { categoryList.innerHTML=''; renderCategoryList(); };
+  categoryList.appendChild(backBtn);
+  categoryList.appendChild(container);
+}
+
+/* -----------------------------
+   Open modal for an element
+------------------------------*/
+function openModalFor(el){
+  modalTitle.textContent = `${el.name} (${el.symbol})`;
+  modalMeta.textContent = `Atomic number: ${el.number} • Atomic mass: ${formatMass(el.mass)} • Category: ${titleCase(el.category)}`;
+  modalDesc.textContent = el.description;
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+modalClose.addEventListener('click', ()=> { modal.classList.add('hidden'); modal.classList.remove('flex'); });
+
+/* Close modal when clicking backdrop */
+modal.addEventListener('click', (e)=> {
+  if(e.target === modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+});
+
+/* -----------------------------
+   Explorer / table
+------------------------------*/
+function renderPeriodicTable(filter='all'){
+  periodicGrid.innerHTML = '';
+  // style mapping for categories - light mode
+  const colorMapLight = {
+    'alkali metal':'bg-yellow-50 border-yellow-200',
+    'alkaline earth metal':'bg-amber-50 border-amber-200',
+    'lanthanide':'bg-teal-50 border-teal-200',
+    'actinide':'bg-emerald-50 border-emerald-200',
+    'transition metal':'bg-sky-50 border-sky-200',
+    'post-transition metal':'bg-lime-50 border-lime-200',
+    'metalloid':'bg-orange-50 border-orange-200',
+    'nonmetal':'bg-white border-gray-200',
+    'halogen':'bg-pink-50 border-pink-200',
+    'noble gas':'bg-indigo-50 border-indigo-200'
+  };
+
+  // style mapping for categories - dark mode
+  const colorMapDark = {
+    'alkali metal':'bg-yellow-900/20 border-yellow-600/30',
+    'alkaline earth metal':'bg-amber-900/20 border-amber-600/30',
+    'lanthanide':'bg-teal-900/20 border-teal-600/30',
+    'actinide':'bg-emerald-900/20 border-emerald-600/30',
+    'transition metal':'bg-sky-900/20 border-sky-600/30',
+    'post-transition metal':'bg-lime-900/20 border-lime-600/30',
+    'metalloid':'bg-orange-900/20 border-orange-600/30',
+    'nonmetal':'bg-slate-800/50 border-slate-600/30',
+    'halogen':'bg-pink-900/20 border-pink-600/30',
+    'noble gas':'bg-indigo-900/20 border-indigo-600/30'
+  };
+  const pool = (filter==='all') ? elements : elements.filter(e=>e.category===filter);
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const colorMap = isDark ? colorMapDark : colorMapLight;
+  
+  pool.forEach(el=>{
+    const cls = colorMap[el.category] || (isDark ? 'bg-slate-800/50 border-slate-600/30' : 'bg-white border-gray-200');
+    const cell = document.createElement('div');
+    cell.className = `p-2 border ${cls} rounded text-xs cursor-pointer flex flex-col items-start`;
+    cell.innerHTML = `<div class="text-[10px] text-slate-500">${el.number}</div>
+                      <div class="text-xl font-bold">${el.symbol}</div>
+                      <div class="text-[11px]">${el.name}</div>
+                      <div class="text-[10px] text-slate-500">${formatMass(el.mass)}</div>`;
+    cell.onclick = ()=> openModalFor(el);
+    periodicGrid.appendChild(cell);
+  });
+}
+
+/* explorer controls */
+exploreBtn.addEventListener('click', ()=> openExplorer());
+dashboardBtn.addEventListener('click', ()=> { explorer.classList.add('hidden'); quizApp.classList.add('hidden'); dashboardEl.classList.remove('hidden'); });
+showTableBtn.addEventListener('click', ()=> { renderPeriodicTable(explorerFilter.value); });
+
+function openExplorer(){
+  dashboardEl.classList.add('hidden');
+  quizApp.classList.add('hidden');
+  explorer.classList.remove('hidden');
+  // default show all
+  renderPeriodicTable(explorerFilter.value);
+}
+
+/* -----------------------------
+   QUIZ logic (Element / Atomic / Category) - enhanced UI integrated
+------------------------------*/
+
+/* Common helpers */
+function genNameDistractors(name, count=3) {
+  // small generator: produce close misspellings
+  const lower = name.toLowerCase();
+  const variants = new Set();
+  const ops = [
+    s => { // swap two adjacent
+      if(s.length<2) return s;
+      const i = Math.floor(Math.random()*(s.length-1));
+      const a = s.split('');
+      [a[i],a[i+1]] = [a[i+1],a[i]];
+      return a.join('');
+    },
+    s => s.replace(/o/g,'a'),
+    s => s.replace(/i/g,'e'),
+    s => s + 'e',
+    s => s.replace(/ium$/,'eum'),
+    s => s.split('').reverse().join('').slice(0, s.length)
+  ];
+  let tries=0;
+  while(variants.size < count && tries < 200){
+    tries++;
+    const op = ops[Math.floor(Math.random()*ops.length)];
+    const cand = op(lower);
+    const out = cand.charAt(0).toUpperCase()+cand.slice(1);
+    if(out.toLowerCase() !== lower) variants.add(out);
+  }
+  // ensure we return exactly count
+  const arr = Array.from(variants).slice(0,count);
+  while(arr.length < count) arr.push('X' + Math.random().toString(36).slice(2,5));
+  return arr;
+}
+function genMassDistractors(base, count=3){
+  const variants = new Set();
+  const magnitude = Math.max(1, Math.abs(base));
+  let attempts=0;
+  while(variants.size < count && attempts < 200){
+    attempts++;
+    const scale = (magnitude < 10) ? 0.5 : (magnitude < 50 ? 1.5 : (magnitude < 200 ? 2.5 : 4));
+    const sign = Math.random() < 0.5 ? -1 : 1;
+    const noise = (Math.random() * scale) + (Math.random()*0.5);
+    const candidate = parseFloat((base + sign * noise).toFixed(3));
+    if(Math.abs(candidate - base) < 0.05) continue;
+    if(candidate <= 0) continue;
+    variants.add(candidate);
+  }
+  while(variants.size < count){
+    variants.add(parseFloat((base + (Math.random()>0.5?1:-1)*(Math.random()*5+0.5)).toFixed(3)));
+  }
+  return Array.from(variants).slice(0,count);
+}
+
+/* App quiz state */
+let mode = '';
+let elPool = [], elIdx=0, elScore=0, elAnswered=false;
+let atomicPool = [], atomicIdx=0, atomicScore=0, atomicAnswered=false;
+let categoryPool = [], catIdx=0, catScore=0, catAnswered=false;
+
+/* Start a quiz mode */
+function startQuizMode(which){
+  mode=which;
+  dashboardEl.classList.add('hidden');
+  explorer.classList.add('hidden');
+  quizApp.classList.remove('hidden');
+  document.getElementById('quizTitle').textContent = which==='element' ? 'Element Quiz' : which==='atomic' ? 'Atomic Mass Quiz' : 'Category Quiz';
+  // hide all subsections then show relevant
+  elementQuizDiv.classList.add('hidden');
+  atomicQuizDiv.classList.add('hidden');
+  categoryQuizDiv.classList.add('hidden');
+  if(which === 'element'){ elementQuizDiv.classList.remove('hidden'); initElementQuiz(); }
+  if(which === 'atomic'){ atomicQuizDiv.classList.remove('hidden'); initAtomicQuiz(); }
+  if(which === 'category'){ categoryQuizDiv.classList.remove('hidden'); initCategoryQuiz(); }
+}
+
+/* Back */
+function backToDashboard(){
+  quizApp.classList.add('hidden');
+  dashboardEl.classList.remove('hidden');
+  explorer.classList.add('hidden');
+}
+
+/* --------- Element Quiz --------- */
+function initElementQuiz(){
+  elPool = shuffle(elements.slice());
+  elIdx = 0; elScore = 0; elAnswered=false;
+  elScoreEl.textContent = elScore; elTotalEl.textContent = elPool.length;
+  showElementQuestion();
+}
+function showElementQuestion(){
+  const el = elPool[elIdx % elPool.length];
+  elSymbol.textContent = el.symbol;
+  elMeta.textContent = `Atomic No. ${el.number} • Mass ${formatMass(el.mass)}`;
+  elChoices.innerHTML = '';
+  elResult.textContent = '';
+  elAnswered = false;
+  const correct = el.name;
+  const wrong = genNameDistractors(correct,3);
+  const choices = shuffle([correct, ...wrong]);
+  choices.forEach(ch=>{
+    const btn = document.createElement('button');
+    btn.className = 'p-3 border rounded-lg text-left bg-white hover:bg-slate-50 transition';
+    btn.innerHTML = `<div class="font-medium">${ch}</div>`;
+    btn.onclick = ()=> {
+      if(elAnswered) return;
+      elAnswered = true;
+      Array.from(elChoices.children).forEach(b=>b.disabled=true);
+      if(ch === correct) {
+        btn.classList.add('bg-emerald-50','border-emerald-300'); elScore++; elResult.textContent='Correct ✅';
+      } else {
+        btn.classList.add('bg-rose-50','border-rose-300');
+        Array.from(elChoices.children).forEach(b=> { if(b.textContent.trim()===correct) b.classList.add('bg-emerald-50','border-emerald-300'); });
+        elResult.textContent = `Wrong — Answer: ${correct}`;
+      }
+      elScoreEl.textContent = elScore;
+    };
+    elChoices.appendChild(btn);
+  });
+}
+elRevealBtn.addEventListener('click', ()=> {
+  const el = elPool[elIdx % elPool.length];
+  Array.from(elChoices.children).forEach(b=> { if(b.textContent.trim()===el.name) b.classList.add('bg-emerald-50','border-emerald-300'); b.disabled=true; });
+  elResult.textContent = `Answer: ${el.name}`;
+  elAnswered = true;
+});
+elNextBtn.addEventListener('click', ()=> {
+  elAnswered = false;
+  elIdx++;
+  if(elIdx >= elPool.length){ alert(`Completed! Score: ${elScore}/${elPool.length}`); elPool = shuffle(elements.slice()); elIdx=0; elScore=0; elScoreEl.textContent=elScore; }
+  showElementQuestion();
+});
+
+/* --------- Atomic Mass Quiz --------- */
+function initAtomicQuiz(){
+  atomicPool = shuffle(elements.slice());
+  atomicIdx = 0; atomicScore = 0; atomicAnswered=false;
+  atomicScoreEl.textContent = atomicScore; atomicTotalEl.textContent = atomicPool.length;
+  showAtomicQuestion();
+}
+function showAtomicQuestion(){
+  const el = atomicPool[atomicIdx % atomicPool.length];
+  atomicQuestionEl.textContent = `What is the atomic mass of ${el.name} (${el.symbol})?`;
+  atomicChoicesEl.innerHTML = '';
+  atomicResult.textContent = ''; atomicAnswered=false;
+  const correct = el.mass;
+  const wrongs = genMassDistractors(correct,3);
+  const choices = shuffle([correct, ...wrongs]);
+  choices.forEach(val=>{
+    const btn = document.createElement('button');
+    btn.className = 'p-3 border rounded-lg text-left bg-white hover:bg-slate-50 transition';
+    btn.innerHTML = `<div class="font-medium">${(typeof val==='number')?parseFloat(val.toFixed(3)):val}</div>`;
+    btn.onclick = ()=> {
+      if(atomicAnswered) return;
+      atomicAnswered = true;
+      Array.from(atomicChoicesEl.children).forEach(b=>b.disabled=true);
+      if(Math.abs(val - correct) < 0.001){
+        btn.classList.add('bg-emerald-50','border-emerald-300'); atomicScore++; atomicResult.textContent = `Correct ✅ (${formatMass(correct)})`;
+      } else {
+        btn.classList.add('bg-rose-50','border-rose-300');
+        Array.from(atomicChoicesEl.children).forEach(b=>{ if(Math.abs(parseFloat(b.textContent) - correct) < 0.001) b.classList.add('bg-emerald-50','border-emerald-300'); });
+        atomicResult.textContent = `Wrong — actual: ${formatMass(correct)}`;
+      }
+      atomicScoreEl.textContent = atomicScore;
+    };
+    atomicChoicesEl.appendChild(btn);
+  });
+}
+atomicNextBtn.addEventListener('click', ()=> {
+  atomicAnswered=false; atomicIdx++;
+  if(atomicIdx >= atomicPool.length){ alert(`Completed! Score: ${atomicScore}/${atomicPool.length}`); atomicPool = shuffle(elements.slice()); atomicIdx=0; atomicScore=0; atomicScoreEl.textContent=atomicScore; }
+  showAtomicQuestion();
+});
+
+/* --------- Category Quiz (30 random) --------- */
+const categoryOptions = [
+  'alkali metal','alkaline earth metal','transition metal','post-transition metal',
+  'metalloid','lanthanide','actinide','nonmetal','halogen','noble gas'
+];
+function initCategoryQuiz(){
+  const copy = shuffle(elements.slice());
+  categoryPool = copy.slice(0,30);
+  catIdx = 0; catScore = 0; catAnswered=false;
+  categoryScoreEl.textContent = catScore; categoryTotalEl.textContent = 30;
+  showCategoryQuestion();
+}
+function showCategoryQuestion(){
+  const el = categoryPool[catIdx % categoryPool.length];
+  categoryQuestionEl.textContent = `What category does ${el.name} (${el.symbol}) belong to?`;
+  categoryChoicesEl.innerHTML = ''; categoryResult.textContent=''; catAnswered=false;
+  const correct = el.category;
+  const opts = [correct];
+  while(opts.length < 4){
+    const r = categoryOptions[Math.floor(Math.random()*categoryOptions.length)];
+    if(!opts.includes(r)) opts.push(r);
+  }
+  shuffle(opts).forEach(o=>{
+    const btn = document.createElement('button');
+    btn.className = 'p-3 border rounded-lg text-left bg-white hover:bg-slate-50 transition';
+    btn.innerHTML = `<div class="font-medium">${titleCase(o)}</div>`;
+    btn.onclick = ()=> {
+      if(catAnswered) return;
+      catAnswered = true;
+      Array.from(categoryChoicesEl.children).forEach(b=>b.disabled=true);
+      if(o === correct){
+        btn.classList.add('bg-emerald-50','border-emerald-300'); categoryResult.textContent = 'Correct ✅'; catScore++;
+      } else {
+        btn.classList.add('bg-rose-50','border-rose-300');
+        Array.from(categoryChoicesEl.children).forEach(b=>{ if(b.textContent.trim().toLowerCase() === titleCase(correct).toLowerCase()) b.classList.add('bg-emerald-50','border-emerald-300'); });
+        categoryResult.textContent = `Wrong — Answer: ${titleCase(correct)}`;
+      }
+      categoryScoreEl.textContent = catScore;
+    };
+    categoryChoicesEl.appendChild(btn);
+  });
+}
+categoryNextBtn.addEventListener('click', ()=> {
+  catAnswered=false; catIdx++;
+  if(catIdx >= categoryPool.length){ alert(`Category Quiz finished! Score: ${catScore}/${categoryPool.length}`); initCategoryQuiz(); return; }
+  showCategoryQuestion();
+});
+
+/* -----------------------------
+   Theme Management
+------------------------------*/
+function initTheme() {
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  setTheme(savedTheme);
+}
+
+function setTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('theme', theme);
+  
+  // Update theme toggle visual state
+  const themeToggle = document.getElementById('themeToggle');
+  if (themeToggle) {
+    themeToggle.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    themeToggle.setAttribute('title', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+  }
+}
+
+function toggleTheme() {
+  const currentTheme = document.documentElement.getAttribute('data-theme');
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  setTheme(newTheme);
+  
+  // Re-render periodic table if it's visible to update colors
+  if (!explorer.classList.contains('hidden')) {
+    renderPeriodicTable(explorerFilter.value);
+  }
+}
+
+// Theme toggle event listener
+document.addEventListener('DOMContentLoaded', function() {
+  const themeToggle = document.getElementById('themeToggle');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', toggleTheme);
+  }
+});
+
+/* -----------------------------
+   Init (show dashboard)
+------------------------------*/
+(function init(){
+  initTheme(); // Initialize theme first
+  dashboardEl.classList.remove('hidden');
+  quizApp.classList.add('hidden');
+  explorer.classList.add('hidden');
+  // populate filter options already done while building categories earlier
+  renderCategoryList();
+  // ensure exploreFilter has all categories (renderCategoryList did this)
+  // show the periodic grid only when user asks
+})();
+</script>
+
+</body>
+</html>
